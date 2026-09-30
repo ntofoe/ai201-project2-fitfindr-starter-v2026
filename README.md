@@ -61,21 +61,21 @@
 
 ### `suggest_outfit`
 
-- **What it does:** Takes a single new item and the user's wardrobe, and asks the model to suggest which wardrobe items would pair with it and why.
+- **What it does:** Takes a single new item and the user's wardrobe, and asks the model to suggest one or two outfits combining them.
 - **Inputs:**
   - `new_item` (dict) — one listing dict, in the shape `search_listings` returns
-  - `wardrobe` (list of dicts) — the user's wardrobe items
-- **Returns:** a list of dicts, each with `wardrobe_item` (the wardrobe item's id), `name` (the wardrobe item's name), and `reason` (a short string explaining the pairing)
-- **When it has nothing:** if `wardrobe` is empty, returns general styling advice as a single-item list (e.g., `[{"wardrobe_item": None, "name": None, "reason": "<general advice>"}]`) rather than failing
+  - `wardrobe` (dict) — a wardrobe dict with an `items` key holding a list of wardrobe item dicts
+- **Returns:** a non-empty string with outfit suggestions, in natural language
+- **When it has nothing:** if `wardrobe['items']` is empty, returns general styling advice (still a non-empty string) rather than raising or returning an empty string
 
 ### `create_fit_card`
 
-- **What it does:** Writes a short caption someone would actually post, combining the new item and its suggested outfit pairings.
+- **What it does:** Writes a short, two-to-four sentence caption someone would actually post, combining the new item and its outfit suggestion.
 - **Inputs:**
-  - `outfit` (list of dicts) — the return value of `suggest_outfit`
+  - `outfit` (str) — the string returned by `suggest_outfit`
   - `new_item` (dict) — the same listing dict passed to `suggest_outfit`
-- **Returns:** a string — the caption text
-- **When it has nothing:** if `outfit` only contains general advice (no real wardrobe pairing), still writes a caption about the item alone, using the general advice as styling context
+- **Returns:** a string — the caption text, mentioning the item, its price, and its platform once each
+- **When it has nothing:** if `outfit` is empty or whitespace-only, returns a descriptive message about the item alone rather than raising
 
 ---
 
