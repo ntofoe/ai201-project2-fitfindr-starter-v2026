@@ -47,59 +47,47 @@
 
 ## Tool Inventory
 
-<!-- Four lines per tool. This is worth 2 points and it's the single most
-     common place students lose them.
-
-     "Returns a list" earns NOTHING. The description has to say what is IN
-     the list.
-
-     The empty case isn't optional either — it's the thing your loop branches
-     on, and if you don't decide it here you'll discover it as a crash in
-     Milestone 5. -->
-
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Searches the listings data for items matching a free-text description, a size, and a maximum price.
+- **Inputs:**
+  - `description` (str) — free text matched against a listing's title, description, and style_tags
+  - `size` (str) — matched against the listing's size field by token, not exact string (see note below)
+  - `max_price` (float) — the highest acceptable price
+- **Returns:** a list of listing dicts, each with `id`, `title`, `price`, `size`, `category`, `style_tags`, `colors`, `brand`, `platform`
+- **When it has nothing:** an empty list (`[]`) — never `None`, never a crash
+
+**Size matching note:** listing sizes are inconsistently formatted (`"W30 L30"`, `"S/M"`, `"XL (oversized)"`, `"M"`). Rather than exact string match, the size field is split on `/` and whitespace, uppercased, and checked for the searched size as a token. This means searching `size="M"` correctly matches a listing sized `"S/M"`, without falsely matching on substrings inside unrelated words.
 
 ### `suggest_outfit`
 
-- **What it does:**
+- **What it does:** Takes a single new item and the user's wardrobe, and asks the model to suggest which wardrobe items would pair with it and why.
 - **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+  - `new_item` (dict) — one listing dict, in the shape `search_listings` returns
+  - `wardrobe` (list of dicts) — the user's wardrobe items
+- **Returns:** a list of dicts, each with `wardrobe_item` (the wardrobe item's id), `name` (the wardrobe item's name), and `reason` (a short string explaining the pairing)
+- **When it has nothing:** if `wardrobe` is empty, returns general styling advice as a single-item list (e.g., `[{"wardrobe_item": None, "name": None, "reason": "<general advice>"}]`) rather than failing
 
 ### `create_fit_card`
 
-- **What it does:**
+- **What it does:** Writes a short caption someone would actually post, combining the new item and its suggested outfit pairings.
 - **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+  - `outfit` (list of dicts) — the return value of `suggest_outfit`
+  - `new_item` (dict) — the same listing dict passed to `suggest_outfit`
+- **Returns:** a string — the caption text
+- **When it has nothing:** if `outfit` only contains general advice (no real wardrobe pairing), still writes a caption about the item alone, using the general advice as styling context
 
 ---
 
 ## Planning Loop
 
-<!-- Your branch rule, stated as a rule — the condition AND both paths — plus
-     the file and function that holds it.
-
-     Like this:
-       "If search_listings returns an empty list, put a message in the session
-        and stop. Otherwise take the first result and go to suggest_outfit."
-        — agent.py::run_agent
-
-     The grader checks your code against what you claim here, so the file and
-     function have to be real. -->
-
-**Branch rule:**
+**Branch rule:** If `search_listings` returns an empty list, put a message in `session["error"]` naming what the user could change (e.g., try a different size or raise the price ceiling) and return the session immediately — `suggest_outfit` is never called with nothing. Otherwise, take the first result from `search_results` as `session["selected_item"]`, pass it into `suggest_outfit`, then pass that result into `create_fit_card`.
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** Regex. Price is pulled from a pattern matching "under $N" (e.g., `r"under \$(\d+)"`), size from a pattern matching "size X" (e.g., `r"size\s+(\S+)"`), and the description is whatever remains of the query after stripping out the matched price and size phrases. Regex was chosen over asking the model because two of the three tools already call the model — parsing with regex keeps this step free, instant, and easy to debug, and both example queries in the starter follow a predictable "description ... size X ... under $N" shape that regex handles reliably.
 
-**What moves through the session:** <!-- which fields, in what order -->
+**What moves through the session:** `session["query"]` (the raw user query) → `session["parsed"]` (the regex-extracted description/size/max_price) → `session["search_results"]` (everything `search_listings` returned) → `session["selected_item"]` (the first result chosen) → `session["outfit_suggestion"]` (the return value of `suggest_outfit`) → `session["fit_card"]` (the final caption string from `create_fit_card`).
 
 ---
 
