@@ -25,9 +25,10 @@ Given a query that matches at least one listing, the agent completes all three
 tool calls and returns a fit card — in at least 4 of 5 tries.
 
 **Why this target:**
-<!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
-     "my search is a plain keyword match and some phrasings will miss" is a
-     real answer. -->
+I chose 4 of 5 rather than 5 of 5 because query parsing is regex-based. Some
+natural phrasings won't match my "under $N" or "size X" patterns cleanly — a
+query that omits the dollar sign, or phrases size differently, could cause an
+occasional parse miss even when a matching listing genuinely exists.
 
 ---
 
@@ -37,66 +38,56 @@ Given a query that matches no listings, the agent stops before calling
 `suggest_outfit` and returns a message naming what to change — 5 of 5 tries.
 
 **Why this target:**
-<!-- Why is 5 of 5 reasonable here when criterion 1 isn't? What's different
-     about this path? -->
+5 of 5 is reasonable here because this path depends only on search_listings
+returning an empty list and the branch correctly stopping — a deterministic
+check with no fuzzy matching involved. If the branch logic is correct, it
+should behave identically on every run, unlike criterion 1's dependency on
+parsing real-world phrasing.
 
 ---
 
-## 3. Something about state
+## 3. The selected item reaches suggest_outfit unchanged
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know that the item your search found is the same item the
-     next tool received? Name something countable or observable.
-
-     This is the criterion people find hardest, because state failure doesn't
-     look like state failure — it looks like a tool problem. Something that
-     compares session["selected_item"] against what actually reached
-     suggest_outfit is the shape you're after. -->
-
-
+For at least 5 of 5 runs, the `id` field of `session["selected_item"]` matches
+the `id` field of the item passed into `suggest_outfit`.
 
 **Why this target:**
 
+This is a state-integrity check, not a content check — either the same item
+reference survives the handoff between tool calls, or it doesn't. There's no
+reasonable case where it should sometimes fail, so 5 of 5 is the right bar.
 
 
 ---
 
-## 4. Something about the fit card
+## 4. The fit card mentions the item's price
 
-<!-- YOU WRITE THIS ONE.
-
-     The fit card calls a model, so the same input can produce different words
-     each time. That's not a bug — it's the nature of the tool. So what would
-     make it acceptable?
-
-     Think about what you'd actually be unhappy to see. A caption that never
-     mentions the price? Two different items producing the same opening
-     sentence? A card longer than a caption anyone would post? Any of those can
-     be turned into a number. -->
-
-
+For at least 4 of 5 different items, the generated fit card mentions the
+item's price.
 
 **Why this target:**
 
-
+The fit card's wording varies since it calls the model, but the price is a
+fact that should reliably appear regardless of phrasing. I chose 4 of 5 rather
+than 5 of 5 because the model occasionally omits specific details even when
+instructed to include them — a known limitation of prompting rather than a
+bug in my code.
 
 ---
 
-## 5. Your choice
+## 5. Size matching respects messy, real-world size formats
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. Speed, the empty
-     wardrobe path, what happens when the model can't be reached, whether the
-     search respects a price ceiling — anything, as long as it names a number
-     or an observable outcome. -->
-
-
+For at least 4 of 5 size-based queries, every returned listing's size field
+contains the queried size as a token (after splitting on "/" and whitespace).
 
 **Why this target:**
 
-
+This tests custom logic I wrote specifically to handle inconsistent size
+formatting in the data ("S/M", "W30 L30", "XL (oversized)"). Unlike a simple
+price comparison, token-based string matching has real room for edge-case
+bugs, so this is worth testing deliberately. I chose 4 of 5 rather than 5 of 5
+because an unusual size format I haven't anticipated could cause an occasional
+miss even when the underlying logic is sound.
 
 ---
 
