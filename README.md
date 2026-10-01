@@ -93,34 +93,25 @@
 
 ## Sample Run
 
-<!-- Two things go here.
-
-     1. One FULL query and its output, pasted as text.
-     2. Your three per-tool terminal tests — the command and what it printed. -->
-
-**One full query**
-
-```
-$ python app.py ask '...'
-
-```
-
 **The three tools, tested one at a time**
 
-```
 $ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
+[{'id': 'lst_002', 'title': 'Y2K Baby Tee — Butterfly Print', 'price': 18.0, 'size': 'S/M', ...}, {'id': 'lst_006', 'title': 'Graphic Tee — 2003 Tour Bootleg Style', 'price': 24.0, 'size': 'L', ...}, {'id': 'lst_017', 'title': 'Mesh Long-Sleeve Top — Black', 'price': 15.0, 'size': 'S/M', ...}, {'id': 'lst_033', 'title': 'Vintage Band Tee — Faded Grey', 'price': 19.0, 'size': 'L', ...}, {'id': 'lst_015', 'title': 'Vintage Graphic Hoodie — Faded Black', 'price': 26.0, 'size': 'L', ...}]
 
-```
+$ python -c "from tools import suggest_outfit; from utils.data_loader import get_example_wardrobe, load_listings; print(suggest_outfit(load_listings()[0], get_example_wardrobe()))"
+Here are two outfit combinations using the new vintage Levi's 501s and pieces from your wardrobe:
 
-```
-$ python -c "from tools import suggest_outfit; ..."
+Outfit 1: Casual & Sporty
+Top: White ribbed tank top
+Outerwear: Black cropped zip hoodie
+Bottoms: Vintage Levi's 501 Jeans — Medium Wash
+Shoes: Chunky white sneakers
+Accessories: Black crossbody bag
 
-```
+Why it works: The medium-wash Levi's and chunky white sneakers give off an effortless, 90s off-duty model vibe...
 
-```
-$ python -c "from tools import create_fit_card; ..."
-
-```
+$ python -c "from tools import create_fit_card; from utils.data_loader import load_listings; print(create_fit_card('jeans and white sneakers', load_listings()[0]))"
+Still can't believe I scored these vintage Levi's 501 jeans on Depop for only $38! The medium wash is seriously the platonic ideal of broken-in denim, and the fit is just chefs kiss. Can't wait to live in these with my beat-up white sneakers all fall.
 
 ---
 
