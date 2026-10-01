@@ -39,8 +39,7 @@
 
 ## What This Does
 
-<!-- Three or four sentences: what a user asks for, and what they get back. -->
-
+FitFindr is an agent that helps someone shop secondhand. A user describes what they want — e.g. "vintage graphic tee under $30, size M" — and the agent searches a listings dataset, picks the best match, checks it against the user's wardrobe to suggest outfit pairings, and writes a short social-media-style caption about the find. If nothing in the listings matches the request, the agent stops immediately and tells the user what to change, rather than guessing.
 
 
 ---
@@ -93,6 +92,27 @@
 
 ## Sample Run
 
+**One full query**
+
+$ python app.py ask 'vintage graphic tee under $30'
+
+Found: Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+Outfit: Here are two specific Y2K-inspired outfit combinations using the new butterfly baby tee and pieces from their existing wardrobe:
+
+Outfit 1: Classic Y2K Streetwear (Contrast & Proportion)
+Top: Y2K Baby Tee — Butterfly Print
+Bottoms: Baggy straight-leg jeans, dark wash
+Outerwear: Black cropped zip hoodie (worn open)
+Shoes: Chunky white sneakers
+Accessories: Black crossbody bag
+
+Why it works: The tight, cropped fit of the baby tee creates a classic Y2K silhouette when paired with baggy, low-slung dark wash jeans...
+
+Fit card: Manifested this exact butterfly baby tee on Depop for just $18 and I'm literally never taking it off! It's giving major early-2000s mall rat energy, and I can't wait to style it with baggy low-rise denim and chunky sneakers. 🦋✨
+
+0 model calls this session, 2 served from cache
+
 **The three tools, tested one at a time**
 
 $ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
@@ -117,24 +137,22 @@ Still can't believe I scored these vintage Levi's 501 jeans on Depop for only $3
 
 ## How I Used AI
 
-<!-- Two specific moments. What you asked, what came back, what you changed.
-
-     "I used Claude to help me code" is not enough.
-
-     "I gave Claude my search_listings spec. It returned None on no match
-     instead of an empty list, so I changed it" is the level we want. -->
-
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+What I asked for: I asked Claude to help design the return shape for suggest_outfit and create_fit_card before I'd looked closely at the actual starter code.
+
+What came back: Claude proposed structured list-of-dicts return values (e.g., {"wardrobe_item": id, "reason": text}), which seemed reasonable in the abstract.
+
+What I changed: When we actually read the real stub signatures in tools.py, both functions were typed to return plain strings, not dicts. I had Claude rewrite the Tool Inventory section to match the real code instead of the earlier guess, and we rebuilt both tools around the correct string-based design.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+What I asked for: I asked Claude how search_listings should match the size field, given that listing sizes in the data are inconsistently formatted ("S/M", "W30 L30", "XL (oversized)").
+
+What came back: Claude explained the risk of a naive substring match — e.g., "S/M" contains "M" correctly, but a plain in check could also cause false positives elsewhere — and suggested token-based matching instead: splitting the size string on / and whitespace, then checking for an exact token match.
+
+What I changed: I adopted the token-matching approach as written, and we verified it directly by testing search_listings('tee', size='M') against the real data to confirm it correctly matched "S/M" without false positives.
+
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
