@@ -81,7 +81,12 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     }
 
     # Step 2: search. THIS IS THE BRANCH.
-    results = search_listings(description, size=size, max_price=max_price)
+    from mcp_client import call_tool
+    results = call_tool("search_listings", {
+        "description": description,
+        "size": size,
+        "max_price": max_price,
+    })
     session["search_results"] = results
 
     if not results:

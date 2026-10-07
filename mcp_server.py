@@ -69,21 +69,23 @@ mcp = FastMCP("fitfindr", log_level="WARNING")
 
 # ── TODO: uncomment and fill this in ──────────────────────────────────────────
 #
-# @mcp.tool()
-# def search_listings(
-#     description: str,
-#     size: str | None = None,
-#     max_price: float | None = None,
-# ) -> list[dict]:
-#     """
-#     <-- YOUR DESCRIPTION GOES HERE.
-#
-#         One or two sentences. What does this tool do, what does it need, and
-#         what does it give back when it finds nothing? Written for a reader
-#         who cannot see the code.
-#     """
-#     return _search_listings_impl(description, size, max_price)
-#
+@mcp.tool()
+def search_listings(
+    description: str,
+    size: str | None = None,
+    max_price: float | None = None,
+) -> list[dict]:
+    """
+    Search a secondhand-clothing listings catalog and return matching items,
+    best match first. `description` is free-text keywords (e.g. "vintage
+    graphic tee"). `size` optionally filters by garment size, matched as a
+    token against the listing's size field — e.g. "M" matches a listing sized
+    "S/M", but not "XL". `max_price` optionally caps the price in whole
+    dollars (inclusive). Returns an empty list if nothing matches — never
+    None, never an error.
+    """
+    return _search_listings_impl(description, size, max_price)
+
 # ──────────────────────────────────────────────────────────────────────────────
 #
 # Two notes on the block above.
