@@ -54,6 +54,9 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     """
     [docstring stays as-is above]
     """
+    from trace import start_trace, step
+
+    start_trace()
     session = new_session(query, wardrobe)
 
     iteration = 0
@@ -79,6 +82,7 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         "size": size,
         "max_price": max_price,
     }
+    step("parse_query", inputs={"query": query}, returned=session["parsed"])
 
     # Step 2: search. THIS IS THE BRANCH.
     from mcp_client import call_tool
@@ -88,28 +92,58 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         "max_price": max_price,
     })
     session["search_results"] = results
+    step(
+        "search_listings (via MCP)",
+        inputs=session["parsed"],
+        returned=results,
+    )
 
     if not results:
         session["error"] = (
             "No listings matched that search. Try a higher price ceiling, "
             "a different size, or broader keywords."
         )
+        step("branch", note="empty results, stopping before suggest_outfit")
         return session
 
     # Step 3: pick the first result.
     session["selected_item"] = results[0]
-
-    # Step 4: suggest an outfit.
-    session["outfit_suggestion"] = suggest_outfit(
-        session["selected_item"], wardrobe
+    step(
+        "select_item",
+        inputs={"candidates": len(results)},
+        returned=session["selected_item"],
     )
 
-    # Step 5: write the fit card.
-    session["fit_card"] = create_fit_card(
-        session["outfit_suggestion"], session["selected_item"]
-    )
+    # Step 4 & 5: suggest an outfit, then write the fit card.
+    try:
+        session["outfit_suggestion"] = suggest_outfit(
+            session["selected_item"], wardrobe
+        )
+        step(
+            "suggest_outfit",
+            inputs={"item": session["selected_item"].get("title"), "wardrobe_items": len(wardrobe.get("items", []))},
+            returned=session["outfit_suggestion"],
+        )
+
+        session["fit_card"] = create_fit_card(
+            session["outfit_suggestion"], session["selected_item"]
+        )
+        step(
+            "create_fit_card",
+            inputs={"item": session["selected_item"].get("title")},
+            returned=session["fit_card"],
+        )
+    except ModelUnavailable as exc:
+        session["error"] = (
+            f"The styling assistant couldn't be reached: {exc} "
+            "Your item was found, but no outfit suggestion or fit card could "
+            "be generated this time. Check your API key or try again shortly."
+        )
+        step("branch", note=f"ModelUnavailable raised, stopping — {exc}")
+        return session
 
     return session
+
 
 # ── running it directly ───────────────────────────────────────────────────────
 
