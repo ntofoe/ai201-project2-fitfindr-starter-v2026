@@ -223,33 +223,38 @@ that produced it:
 
 ## Loop Trace
 
-<!-- One full run, printed step by step, with the MCP call visible in it.
+**Happy path** — `python app.py ask 'vintage graphic tee under $30' --trace`
 
-     `python app.py ask '...' --trace` once you've added the trace.step()
-     calls in Milestone 2.
+[1] parse_query
+in: dict with keys: query
+out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+in: dict with keys: description, size, max_price
+out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
+[3] select_item
+in: dict with keys: candidates
+out: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+[4] suggest_outfit
+in: dict with keys: item, wardrobe_items
+out: Here are two specific Y2K-inspired outfit combinations using the new butterfly baby tee and pieces from their …
+[5] create_fit_card
+in: dict with keys: item
+out: Manifested this exact butterfly baby tee on Depop for just $18 and I'm literally never taking it off! It's giv…
 
-     Worth pasting BOTH the happy path and the empty-search path. The empty
-     one should be visibly shorter, because it stops. If your two traces are
-     the same length, your branch isn't working — and this is the fastest way
-     anyone will ever find that out. -->
 
-**Happy path**
+**Empty search** — `python app.py ask 'designer ballgown size XXS under $5' --trace`
 
-```
+[1] parse_query
+in: dict with keys: query
+out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+in: dict with keys: description, size, max_price
+out: [] (empty)
+[3] branch
+→ empty results, stopping before suggest_outfit
 
-```
 
-**Empty search**
-
-```
-
-```
-
-**On the MCP move:** <!-- what changed in your code, and whether anything
-behaved differently afterwards. If the rewire didn't work, say exactly where it
-broke — the error text and the last thing that worked. That earns the point in
-full. -->
-
+**On the MCP move:** I moved `search_listings` onto MCP by registering it in `mcp_server.py` with a `@mcp.tool()` decorator, a description written for an agent that cannot see the implementation, and typed inputs matching my Tool Inventory. In `agent.py::run_agent`, I swapped the direct call for `mcp_client.call_tool("search_listings", {...})`. The result was identical before and after the swap — same item found, same outfit, same fit card — confirming the tool's actual behavior didn't change, only how it's reached.
 
 
 ---
