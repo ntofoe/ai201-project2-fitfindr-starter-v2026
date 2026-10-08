@@ -35,18 +35,84 @@ SCENARIOS = [
         "wardrobe": "empty",
         "criterion": None,
     },
-    # TODO: add what your criteria 3, 4 and 5 need.
-    #
-    # Set "criterion" to the number in criteria.md that the scenario tests.
-    # "criterion": None means a diagnostic run — useful to have, but it isn't
-    # one of your five, and run_eval.py marks it as such in the table.
-    #
-    # For a state criterion, any normal query works — what you're checking is
-    # what ends up in the session, not what the user typed.
-    #
-    # For a fit-card criterion, you probably want the SAME query listed more
-    # than once, or several different items, depending on what your criterion
-    # actually says.
+        {
+        # State integrity check. Criterion 3 — does selected_item survive
+        # the handoff into suggest_outfit unchanged?
+        "name": "state integrity check",
+        "query": "vintage graphic tee under $30",
+        "wardrobe": "example",
+        "criterion": 3,
+    },
+    {
+        # Fit card mentions price — item 1 of 5 different items. Criterion 4.
+        "name": "fit card mentions price (item 1)",
+        "query": "vintage graphic tee under $30",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        # Fit card mentions price — item 2 of 5 different items. Criterion 4.
+        "name": "fit card mentions price (item 2)",
+        "query": "corduroy wide-leg pants",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        # Fit card mentions price — item 3 of 5 different items. Criterion 4.
+        "name": "fit card mentions price (item 3)",
+        "query": "track jacket under $50",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        # Fit card mentions price — item 4 of 5 different items. Criterion 4.
+        "name": "fit card mentions price (item 4)",
+        "query": "flannel shirt",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        # Fit card mentions price — item 5 of 5 different items. Criterion 4.
+        "name": "fit card mentions price (item 5)",
+        "query": "denim jacket under $60",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        # Size matching with messy format #1. Criterion 5.
+        "name": "size matching: S/M",
+        "query": "graphic tee size M",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
+    {
+        # Size matching with messy format #2. Criterion 5.
+        "name": "size matching: oversized",
+        "query": "flannel shirt size XL",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
+    {
+        # Size matching with messy format #3. Criterion 5.
+        "name": "size matching: waist/length",
+        "query": "jeans size W30",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
+    {
+        # Size matching with messy format #4. Criterion 5.
+        "name": "size matching: single letter",
+        "query": "band tee size L",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
+    {
+        # Size matching with messy format #5. Criterion 5.
+        "name": "size matching: large",
+        "query": "hoodie size L",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
 ]
 
 WARDROBES = ("example", "empty")
